@@ -1,0 +1,65 @@
+service: lab-vferneda-serverless
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: '20211026'
+  region: us-east-1
+  iam:
+      role:
+          statements:
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:GetItem
+                - dynamodb:Scan
+              Resource:
+                - arn:aws:dynamodb:us-east-1:189771226512:table/UnityTable
+                
+functions:
+  hello:
+    handler: src/hello.handler
+    events:
+      - http:
+          path: /
+          method: get
+  insertUnity:
+    handler: src/insertUnity.handler
+    events:
+      - http:
+          path: /unity
+          method: post
+  fetchUnities:
+    handler: src/fetchUnities.handler
+    events:
+      - http:
+          path: /unities
+          method: get
+  fetchUnity:
+    handler: src/fetchUnity.handler
+    events:
+      - http:
+          path: /unities/{id}
+          method: get
+  updateUnity:
+    handler: src/updateUnity.handler
+    events:
+      - http:
+          path: /unities/{id}
+          method: put
+resources:
+  Resources:
+    ItemTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+          TableName: UnityTable
+          BillingMode: PAY_PER_REQUEST
+          AttributeDefinitions:
+            - AttributeName: id
+              AttributeType: S
+          KeySchema:
+            - AttributeName: id
+              KeyType: HASH
